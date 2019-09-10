@@ -65,9 +65,9 @@ function blockwall_add_instance($mod) {
     
     foreach( $mod->blockselection as $idx => $blockname) {
       $page = new moodle_page();
-      $page->set_context($context);
-      $blockmanager = new block_manager($page);
-      $blockmanager->add_block($blockname, 'blockwall-main', $idx, false);
+      $page->set_context(context_module::instance($mod->cmid));
+      $page->blocks->add_region(mod_blockwall_lib::$region);
+      $page->blocks->add_block($blockname, mod_blockwall_lib::$region, $idx, false);
     }
 
     /*
