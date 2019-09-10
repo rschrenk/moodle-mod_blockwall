@@ -33,7 +33,6 @@ class mod_blockwall_mod_form extends moodleform_mod {
 
         $mform =& $this->_form;
 
-        $mform->addElement('id', 'hidden', $id);
         $mform->addElement('header', 'general', get_string('general', 'form'));
         $this->standard_intro_elements();
 
@@ -41,6 +40,7 @@ class mod_blockwall_mod_form extends moodleform_mod {
         $page = new moodle_page();
         $page->set_course($COURSE);
         $blockmanager = new block_manager($page);
+        $blockmanager->load_blocks(false);
         $blocklist = $blockmanager->get_addable_blocks();
         $options = array(
             'multiple' => true
