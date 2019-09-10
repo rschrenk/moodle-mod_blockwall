@@ -56,6 +56,7 @@ function blockwall_add_instance($mod) {
     global $DB, $COURSE;
     $mod->course = $COURSE->id;
     $mod->created = time();
+    $mod->modified = time();
     $mod->cmid = $mod->coursemodule;
 
     $id = $DB->insert_record('blockwall', $mod, true);
@@ -65,6 +66,7 @@ function blockwall_update_instance($mod) {
     global $DB, $COURSE;
     $mod->id = $mod->instance;
     $mod->course = $COURSE->id;
+    $mod->modified = time();
     $mod->cmid = $mod->coursemodule;
 
     // Now receive files.
@@ -96,9 +98,15 @@ function blockwall_get_coursemodule_info($coursemodule) {
     global $OUTPUT, $PAGE;
 
     $PAGE->requires->css('/mod/blockwall/style/main.css');
-    $PAGE->blocks->add_region('mod_blockwall-main', true);
+    //$PAGE->blocks->add_region('mod_blockwall-main', true);
+//print_r($coursemodule);
+    $context = context_module::instance($coursemodule->id);
 
-    $context = context_module::instance($coursemodule->instance);
+    $renderer = new renderer_base($PAGE, 'blockwall');
+    return $renderer->custom_block_region('blockwall-main');
+    //return $renderer;
+    /*
+
     $blockinstances = mod_blockwall_lib::get_block_instances($context->id);
 
     if (count($blocks) > 0) {
@@ -114,6 +122,7 @@ function blockwall_get_coursemodule_info($coursemodule) {
     } else {
         return null;
     }
+    */
 }
 
 function blockwall_supports($feature) {
