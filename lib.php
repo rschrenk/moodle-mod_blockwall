@@ -20,49 +20,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_blockwall\blockwall;
+
 defined('MOODLE_INTERNAL') || die;
-
-class mod_blockwall_lib {
-    public static $region = 'side-post'; // 'blockwall-main';
-
-    public function __construct($id) {
-        global $CFG, $DB;
-
-
-    }
-    /**
-     * Loads all blocks for a context id and returns the block instances in an array.
-     * @param contextid
-     * @return array of block instances.
-     */
-    public static function get_block_instances($contextid) {
-        $showblocks = $DB->get_records('block_instances', array('parentcontextid' => $contextid));
-        $blocks = array();
-        foreach ($showblocks AS $showblock) {
-            $blocks[] = new block_instance($showblock->blockname, $showblock);
-        }
-        return $blocks;
-    }
-    /**
-     * Renders a block instance
-     * @param blockinstance
-     * @return HTML output.
-     */
-    public static function render_block($blockinstance) {
-        // @todo we have no clue how this will work.
-        return $blockinstance->rendersomehow();
-    }
-}
 
 function blockwall_add_instance($mod) {
     global $DB, $COURSE;
     $mod->course = $COURSE->id;
     $mod->created = time();
+    $mod->name = get_string('modulename','blockwall');
     $mod->modified = time();
     $mod->cmid = $mod->coursemodule;
 
     $id = $DB->insert_record('blockwall', $mod, true);
-    
+
     foreach( $mod->blockselection as $idx => $blockname) {
       $page = new moodle_page();
       $page->set_context($context);
@@ -77,6 +48,7 @@ function blockwall_add_instance($mod) {
     */
     return $id;
 }
+
 function blockwall_update_instance($mod) {
     global $DB, $COURSE;
     $mod->id = $mod->instance;
@@ -96,9 +68,18 @@ function blockwall_update_instance($mod) {
 }
 function blockwall_delete_instance($id) {
     global $DB;
-    $DB->delete_records('blockwall', array('id' => $id));
 
-    return true;
+    if (! $blockwall = $DB->get_record("blockwall", array("id"=>$id))) {
+        return false;
+    }
+
+    $result = true;
+
+    if (! $DB->delete_records("label", array("id"=>$blockwall->id))) {
+        $result = false;
+    }
+
+    return $result;
 }
 
 /**
@@ -112,20 +93,20 @@ function blockwall_delete_instance($id) {
  * @return object|null
  */
 function blockwall_get_coursemodule_info($coursemodule) {
-    global $OUTPUT, $PAGE;
+    global $OUTPUT, $PAGE, $COURSE;
 
     $PAGE->requires->css('/mod/blockwall/style/main.css');
     //$PAGE->blocks->add_region('mod_blockwall-main', true);
 //print_r($coursemodule);
     $context = context_module::instance($coursemodule->id);
     // For dev purposes.
-    global $COURSE;
     $context = context_course::instance($COURSE->id);
     $page = new moodle_page();
     $page->set_context($context);
     $renderer = new plugin_renderer_base($page, 'blockwall');
 
-    $output = $renderer->custom_block_region(mod_blockwall_lib::$region);
+    $output = $renderer->custom_block_region(blockwall::$region);
+    $info = new stdClass();
     $info->name = "";
     $info->content = "blahblah" .  $output;
     return $info;
