@@ -22,11 +22,35 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-class mod_blockwall {
+class mod_blockwall_lib {
     public function __construct($id) {
         global $CFG, $DB;
 
+
     }
+    /**
+     * Loads all blocks for a context id and returns the block instances in an array.
+     * @param contextid
+     * @return array of block instances.
+     */
+    public static function get_block_instances($contextid) {
+        $showblocks = $DB->get_records('block_instances', array('parentcontextid' => $contextid));
+        $blocks = array();
+        foreach ($showblocks AS $showblock) {
+            $blocks[] = new block_instance($showblock->blockname, $showblock);
+        }
+        return $blocks;
+    }
+    /**
+     * Renders a block instance
+     * @param blockinstance
+     * @return HTML output.
+     */
+    public static function render_block($blockinstance) {
+        // @todo we have no clue how this will work.
+        return $blockinstance->rendersomehow();
+    }
+}
 
 function blockwall_add_instance($mod) {
     global $DB, $COURSE;
@@ -56,4 +80,37 @@ function blockwall_delete_instance($id) {
     $DB->delete_records('blockwall', array('id' => $id));
 
     return true;
+}
+
+/**
+ * Given a course_module object, this function returns any
+ * "extra" information that may be needed when printing
+ * this activity in a course listing.
+ * See get_array_of_activities() in course/lib.php
+ *
+ * @global object
+ * @param object $coursemodule
+ * @return object|null
+ */
+function blockwall_get_coursemodule_info($coursemodule) {
+    global $OUTPUT, $PAGE;
+
+    $PAGE->requires->css('/mod/blockwall/style/main.css');
+
+    $context = context_module::instance($coursemodule->instance);
+    $blockinstances = mod_blockwall_lib::get_block_instances($context->id);
+
+    if (count($blocks) > 0) {
+        $blocks = array();
+        foreach ($blockinstancess AS $blockinstance) {
+            $blocks[] = mod_blockwall_lib::render_block($blockinstance);
+        }
+        $info = new stdClass();
+        $info->content = $OUTPUT->render_from_template('mod_blockwall/grid.mustache', array(
+            'blocks' => $blocks,
+        ));
+        return $info;
+    } else {
+        return null;
+    }
 }

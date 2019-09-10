@@ -23,16 +23,28 @@
 
 require('../../config.php');
 $cmid = required_param('id', PARAM_INT);
-$cm = get_coursemodule_from_id('confman', $cmid, 0, false, MUST_EXIST);
+
+if ($cmid) {
+
+
+} else {
+
+}
+
+$cm = get_coursemodule_from_id('blockwall', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+$coursecontext = context_course::instance($course->id);
 
 require_login($course, true, $cm);
+$PAGE->set_context($coursecontext);
 $PAGE->set_url('/mod/blockwall/view.php', array('id' => $cm->id));
-$PAGE->set_title(get_string('modulename', 'confman'));
-$PAGE->set_heading(get_string('modulename', 'confman'));
+//$PAGE->set_title(get_string('modulename', 'blockwall'));
+//$PAGE->set_heading(get_string('modulename', 'blockwall'));
 $PAGE->set_pagelayout('standard');
 
-$context = context_course::instance($course->id);
+echo $OUTPUT->header();
+
+
 
 
 echo $OUTPUT->footer();
