@@ -96,6 +96,7 @@ function blockwall_get_coursemodule_info($coursemodule) {
     global $OUTPUT, $PAGE;
 
     $PAGE->requires->css('/mod/blockwall/style/main.css');
+    $PAGE->blocks->add_region('mod_blockwall-main', true);
 
     $context = context_module::instance($coursemodule->instance);
     $blockinstances = mod_blockwall_lib::get_block_instances($context->id);
