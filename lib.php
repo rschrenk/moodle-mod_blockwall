@@ -38,7 +38,7 @@ function blockwall_add_instance($mod) {
       $page = new moodle_page();
       $page->set_context(context_module::instance($mod->cmid));
       $page->blocks->add_region(mod_blockwall_lib::$region);
-      $page->blocks->add_block($blockname, mod_blockwall_lib::$region, $idx, false);
+      $page->blocks->add_block($blockname, mod_blockwall_lib::$region, $idx, false, '*');
     }
 
     /*
@@ -92,43 +92,40 @@ function blockwall_delete_instance($id) {
  * @param object $coursemodule
  * @return object|null
  */
-function blockwall_get_coursemodule_info($coursemodule) {
-    global $OUTPUT, $PAGE, $COURSE;
+function blockwall_get_coursemodule_info($cm) {
+    global $COURSE;
+    // $PAGE->requires->css('/mod/blockwall/style/main.css');
 
-    $PAGE->requires->css('/mod/blockwall/style/main.css');
-    //$PAGE->blocks->add_region('mod_blockwall-main', true);
-//print_r($coursemodule);
-    $context = context_module::instance($coursemodule->id);
-    // For dev purposes.
-    $context = context_course::instance($COURSE->id);
+    $blockcontent = "";
+
     $page = new moodle_page();
-    $page->set_context($context);
-    $renderer = new plugin_renderer_base($page, 'blockwall');
+    $page->set_course($COURSE);
+    $page->set_context(context_module::instance($cm->id));
 
-    $output = $renderer->custom_block_region(blockwall::$region);
-    $info = new stdClass();
-    $info->name = "";
-    $info->content = "blahblah" .  $output;
-    return $info;
-    //return $renderer;
-    /*
+    $bm = new block_manager($page);
+    $bm->add_region(mod_blockwall_lib::$region, true);
+    $bm->load_blocks();
+    $bm->create_all_block_instances();
 
-    $blockinstances = mod_blockwall_lib::get_block_instances($context->id);
-
-    if (count($blocks) > 0) {
-        $blocks = array();
-        foreach ($blockinstancess AS $blockinstance) {
-            $blocks[] = mod_blockwall_lib::render_block($blockinstance);
-        }
-        $info = new stdClass();
-        $info->content = $OUTPUT->render_from_template('mod_blockwall/grid.mustache', array(
-            'blocks' => $blocks,
-        ));
-        return $info;
-    } else {
-        return null;
+    $blocks = $bm->get_content_for_region(mod_blockwall_lib::$region, true);
+    foreach ($blocks as $block) {
+        $blockcontent .= $block->content;
     }
-    */
+    // print_r($blockcontent);
+    // die();
+
+    // $renderer = new plugin_renderer_base($page, 'blockwall');
+    // $output = $renderer->custom_block_region(mod_blockwall_lib::$region);
+
+    // ini_set('xdebug.var_display_max_depth', '5');
+    // var_dump($bm);
+    // die();
+
+    $cminfo = new cached_cm_info();
+    $cminfo->name = "";
+    $cminfo->content = $blockcontent;
+
+    return $cminfo;
 }
 
 function blockwall_supports($feature) {
