@@ -20,10 +20,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['modulename'] = 'ConfMan';
-$string['modulenameplural'] = 'ConfMans';
-$string['pluginname'] = 'ConfMan';
-$string['pluginadministration'] = 'ConfMan';
-$string['capability:missing'] = 'Missing required Capability';
-$string['confman:addinstance'] = 'Add ConfMan';
-$string['confman:view'] = 'View ConfMan';
+$string['modulename'] = 'Blockwall';
+$string['modulenameplural'] = 'Blockwalls';
+$string['pluginname'] = 'blockwall';
+$string['pluginadministration'] = 'Manage blockwalls';
+$string['blockwall:addinstance'] = 'Add Blockwall';
+$string['blockwall:view'] = 'View Blockwall';
