@@ -23,6 +23,8 @@
 defined('MOODLE_INTERNAL') || die;
 
 class mod_blockwall_lib {
+    public static $region = 'side-post'; // 'blockwall-main';
+
     public function __construct($id) {
         global $CFG, $DB;
 
@@ -60,6 +62,12 @@ function blockwall_add_instance($mod) {
     $mod->cmid = $mod->coursemodule;
 
     $id = $DB->insert_record('blockwall', $mod, true);
+
+    /*
+    $inst = $DB->get_record('course_modules', array('id' => $id));
+    $inst->showdescription = 1;
+    $DB->update_record('course_modules', $inst);
+    */
     return $id;
 }
 function blockwall_update_instance($mod) {
@@ -69,11 +77,13 @@ function blockwall_update_instance($mod) {
     $mod->modified = time();
     $mod->cmid = $mod->coursemodule;
 
-    // Now receive files.
-    $modcontext = context_module::instance($mod->cmid);
-    $draftid = file_get_submitted_draft_itemid('introeditor');
-
     $DB->update_record('blockwall', $mod);
+
+    /*
+    $inst = $DB->get_record('course_modules', array('id' => $id));
+    $inst->showdescription = 1;
+    $DB->update_record('course_modules', $inst);
+    */
 
     return true;
 }
@@ -101,10 +111,17 @@ function blockwall_get_coursemodule_info($coursemodule) {
     //$PAGE->blocks->add_region('mod_blockwall-main', true);
 //print_r($coursemodule);
     $context = context_module::instance($coursemodule->id);
+    // For dev purposes.
+    global $COURSE;
+    $context = context_course::instance($COURSE->id);
     $page = new moodle_page();
     $page->set_context($context);
-    $renderer = new renderer_base($page, 'blockwall');
-    return $renderer->custom_block_region('blockwall-main');
+    $renderer = new plugin_renderer_base($page, 'blockwall');
+
+    $output = $renderer->custom_block_region(mod_blockwall_lib::$region);
+    $info->name = "";
+    $info->content = "blahblah" .  $output;
+    return $info;
     //return $renderer;
     /*
 

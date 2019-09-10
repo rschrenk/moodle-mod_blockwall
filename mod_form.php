@@ -56,7 +56,13 @@ class mod_blockwall_mod_form extends moodleform_mod {
 
         $this->standard_coursemodule_elements();
         $this->standard_intro_elements();
-        
+
+        /*
+        $mform->addElement('hidden', 'showdescription', 1);
+        $mform->setType('showdescription', PARAM_INT);
+        */
+        $mform->setDefault('showdescription', 1);
+
         $this->add_action_buttons();
     }
 }
