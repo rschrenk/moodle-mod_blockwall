@@ -22,12 +22,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-class mod_blockwall {
-    public function __construct($id) {
-        global $CFG, $DB;
-
-    }
-
 function blockwall_add_instance($mod) {
     global $DB, $COURSE;
     $mod->course = $COURSE->id;

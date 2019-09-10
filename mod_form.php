@@ -19,26 +19,41 @@
  * @copyright  2019, Harald Bamberger, David Bogner, Nicklas Placho, Robert Schrenk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
 }
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
-require_once($CFG->dirroot.'/mod/confman/lib.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/blocklib.php');
 
 class mod_blockwall_mod_form extends moodleform_mod {
     public function definition() {
-        global $CFG, $COURSE, $DB, $OUTPUT, $USER;
-        global $embedded, $eventid, $id, $token, $preview;
+        global $COURSE;
 
         $mform =& $this->_form;
 
         $mform->addElement('id', 'hidden', $id);
+        $mform->addElement('header', 'general', get_string('general', 'form'));
+        $this->standard_intro_elements();
 
+        // Get list of available blocks on the course page.
+        $page = new moodle_page();
+        $page->set_course($COURSE);
+        $blockmanager = new block_manager($page);
+        $blocklist = $blockmanager->get_addable_blocks();
+        $options = array(
+            'multiple' => true
+        );
+        $blockselection = [];
+        foreach ($blocklist as $blockname => $block) {
+            $blockselection[$block->id] =  get_string('pluginname', $block->name);
+        }
 
-
-        $this->standard_coursemodule_elements();
+        // Provide selection form element for available blocks.
+        $mform->addElement('autocomplete', 'blockselection',
+            get_string('blockselection', 'blockwall'), $blockselection, $options);
+        $mform->setType('blockselection', PARAM_INT);
 
         $this->add_action_buttons();
     }
