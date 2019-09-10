@@ -101,8 +101,9 @@ function blockwall_get_coursemodule_info($coursemodule) {
     //$PAGE->blocks->add_region('mod_blockwall-main', true);
 //print_r($coursemodule);
     $context = context_module::instance($coursemodule->id);
-
-    $renderer = new renderer_base($PAGE, 'blockwall');
+    $page = new moodle_page();
+    $page->set_context($context);
+    $renderer = new renderer_base($page, 'blockwall');
     return $renderer->custom_block_region('blockwall-main');
     //return $renderer;
     /*
