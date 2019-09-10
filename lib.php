@@ -62,6 +62,13 @@ function blockwall_add_instance($mod) {
     $mod->cmid = $mod->coursemodule;
 
     $id = $DB->insert_record('blockwall', $mod, true);
+    
+    foreach( $mod->blockselection as $idx => $blockname) {
+      $page = new moodle_page();
+      $page->set_context($context);
+      $blockmanager = new block_manager($page);
+      $blockmanager->add_block($blockname, 'blockwall-main', $idx, false);
+    }
 
     /*
     $inst = $DB->get_record('course_modules', array('id' => $id));

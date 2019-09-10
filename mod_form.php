@@ -46,13 +46,13 @@ class mod_blockwall_mod_form extends moodleform_mod {
         );
         $blockselection = [];
         foreach ($blocklist as $blockname => $block) {
-            $blockselection[$block->id] =  get_string('pluginname', 'block_' . $block->name);
+            $blockselection[$block->name] =  get_string('pluginname', 'block_' . $block->name);
         }
 
         // Provide selection form element for available blocks.
         $mform->addElement('autocomplete', 'blockselection',
             get_string('blockselection', 'blockwall'), $blockselection, $options);
-        $mform->setType('blockselection', PARAM_INT);
+        $mform->setType('blockselection', PARAM_ALPHANUMEXT);
 
         $this->standard_coursemodule_elements();
         $this->standard_intro_elements();
