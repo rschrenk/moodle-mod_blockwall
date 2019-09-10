@@ -33,21 +33,20 @@ class mod_blockwall_mod_form extends moodleform_mod {
 
         $mform =& $this->_form;
 
-        $mform->addElement('id', 'hidden', $id);
         $mform->addElement('header', 'general', get_string('general', 'form'));
-        $this->standard_intro_elements();
 
         // Get list of available blocks on the course page.
         $page = new moodle_page();
         $page->set_course($COURSE);
         $blockmanager = new block_manager($page);
+        $blockmanager->load_blocks(true);
         $blocklist = $blockmanager->get_addable_blocks();
         $options = array(
             'multiple' => true
         );
         $blockselection = [];
         foreach ($blocklist as $blockname => $block) {
-            $blockselection[$block->id] =  get_string('pluginname', $block->name);
+            $blockselection[$block->id] =  get_string('pluginname', 'block_' . $block->name);
         }
 
         // Provide selection form element for available blocks.
@@ -55,6 +54,9 @@ class mod_blockwall_mod_form extends moodleform_mod {
             get_string('blockselection', 'blockwall'), $blockselection, $options);
         $mform->setType('blockselection', PARAM_INT);
 
+        $this->standard_coursemodule_elements();
+        $this->standard_intro_elements();
+        
         $this->add_action_buttons();
     }
 }
