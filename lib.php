@@ -22,6 +22,8 @@
 
 use mod_blockwall\blockwall;
 
+require_once(__DIR__ . '/classes/blockwall.php');
+
 defined('MOODLE_INTERNAL') || die;
 
 function blockwall_add_instance($mod) {
@@ -33,13 +35,7 @@ function blockwall_add_instance($mod) {
     $mod->cmid = $mod->coursemodule;
 
     $id = $DB->insert_record('blockwall', $mod, true);
-
-    foreach( $mod->blockselection as $idx => $blockname) {
-      $page = new moodle_page();
-      $page->set_context(context_module::instance($mod->cmid));
-      $page->blocks->add_region(mod_blockwall_lib::$region);
-      $page->blocks->add_block($blockname, mod_blockwall_lib::$region, $idx, false, '*');
-    }
+    blockwall_update_instance_region($mod);
 
     /*
     $inst = $DB->get_record('course_modules', array('id' => $id));
@@ -58,6 +54,8 @@ function blockwall_update_instance($mod) {
 
     $DB->update_record('blockwall', $mod);
 
+    blockwall_update_instance_region($mod);
+
     /*
     $inst = $DB->get_record('course_modules', array('id' => $id));
     $inst->showdescription = 1;
@@ -66,6 +64,22 @@ function blockwall_update_instance($mod) {
 
     return true;
 }
+/**
+ * Updates the blocks for our region.
+ *
+ * @param mod the course module.
+ */
+function blockwall_update_instance_region($mod) {
+    // We need to add the blocks to the course-context to a region dependent on the cmid!
+    $page = new moodle_page();
+    //$page->set_context(context_module::instance($mod->cmid));
+    $page->set_context(context_course::instance($mod->course));
+    $page->blocks->add_region(mod_blockwall\blockwall::region($mod->cmid));
+    foreach( $mod->blockselection as $idx => $blockname) {
+      $page->blocks->add_block($blockname, mod_blockwall\blockwall::region(), $idx, false, '*');
+    }
+}
+
 function blockwall_delete_instance($id) {
     global $DB;
 
@@ -93,37 +107,12 @@ function blockwall_delete_instance($id) {
  * @return object|null
  */
 function blockwall_get_coursemodule_info($cm) {
-    global $COURSE;
+    global $COURSE, $OUTPUT;
     // $PAGE->requires->css('/mod/blockwall/style/main.css');
-
-    $blockcontent = "";
-
-    $page = new moodle_page();
-    $page->set_course($COURSE);
-    $page->set_context(context_module::instance($cm->id));
-
-    $bm = new block_manager($page);
-    $bm->add_region(mod_blockwall_lib::$region, true);
-    $bm->load_blocks();
-    $bm->create_all_block_instances();
-
-    $blocks = $bm->get_content_for_region(mod_blockwall_lib::$region, true);
-    foreach ($blocks as $block) {
-        $blockcontent .= $block->content;
-    }
-    // print_r($blockcontent);
-    // die();
-
-    // $renderer = new plugin_renderer_base($page, 'blockwall');
-    // $output = $renderer->custom_block_region(mod_blockwall_lib::$region);
-
-    // ini_set('xdebug.var_display_max_depth', '5');
-    // var_dump($bm);
-    // die();
 
     $cminfo = new cached_cm_info();
     $cminfo->name = "";
-    $cminfo->content = $blockcontent;
+    $cminfo->content = mod_blockwall\blockwall::render_blocks();
 
     return $cminfo;
 }

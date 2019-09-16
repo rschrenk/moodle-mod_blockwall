@@ -24,7 +24,8 @@ use contextid;
 use HTML;
 
 class blockwall {
-    public static $region = 'side-post'; // 'blockwall-main';
+    private static $region = 'blockwall'; // 'blockwall-main';
+    private static $cmid = 0; // 'To store the current cmid'.
 
     public function __construct($id) {
         global $CFG, $DB;
@@ -47,13 +48,33 @@ class blockwall {
     }
 
     /**
-     * Renders a block instance
+     * Gets or sets the region name including the cmid.
      *
-     * @param blockinstance
+     * @param cmid if cmid is given will set this.
+     */
+    public static function region($cmid = 0) {
+        if (!empty($cmid)) self::$cmid = $cmid;
+        return self::$region . '-' . self::$cmid;
+    }
+
+    /**
+     * Renders all blocks in a region.
+     *
+     * @param region (optional) region to render, if empty use default region.
      * @return HTML output.
      */
-    public static function render_block($blockinstance) {
-        // @todo we have no clue how this will work.
-        return $blockinstance->rendersomehow();
+    public static function render_blocks($region = '') {
+        global $OUTPUT, $PAGE;
+        if (empty($region)) {
+            $region = self::region();
+        }
+
+        $blocks = $PAGE->blocks->get_content_for_region($region, $OUTPUT);
+        $blockcontents = array();
+        foreach ($blocks AS $block) {
+            $blockcontents[] = array('title' => $block->title, 'content' => $block->content);
+        }
+
+        return $OUTPUT->render_from_template('blockwall/grid', array('blocks' => $blockcontents));
     }
 }

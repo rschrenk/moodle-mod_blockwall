@@ -26,3 +26,4 @@ $string['pluginname'] = 'blockwall';
 $string['pluginadministration'] = 'Manage blockwalls';
 $string['blockwall:addinstance'] = 'Add Blockwall';
 $string['blockwall:view'] = 'View Blockwall';
+$string['blockselection'] = 'Select blocks';
